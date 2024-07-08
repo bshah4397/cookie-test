@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookie Setter</title>
+    <script>
+      function setCookie() {
+        const value = document.getElementById("inputBox").value;
+        document.cookie = `myCookie=${value}; path=/`;
+        showCookie();
+      }
+ 
+      function showCookie() {
+        const name = "myCookie=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == " ") {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            document.getElementById("cookieValue").innerText = c.substring(
+              name.length,
+              c.length
+            );
+            return;
+          }
+        }
+        document.getElementById("cookieValue").innerText = "Cookie not set";
+      }
+ 
+      window.onload = function () {
+        showCookie();
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Sample Cookie App</h1>
+    <div>
+      <label for="inputBox">Enter value:</label>
+      <input type="text" id="inputBox" />
+      <button onclick="setCookie()">Set Cookie</button>
+    </div>
+    <div id="cookieValue">Cookie not set</div>
+  </body>
+</html>
