@@ -25,26 +25,14 @@
     }
 
     function doThingsWithLocalStorage(handle) {
-      const parentLocal = JSON.stringify(window.parent.localStorage);
-      console.log(window.parent.location.pathname, "window.parent.localStorage", parentLocal);
-      document.getElementById("pl").innerText = `${window.parent.location.pathname} ${parentLocal}`;
+      
+      document.getElementById("cl").innerText = JSON.stringify(window.localStorage);
 
       if (handle) {
         const time = new Date().toTimeString();
         handle.localStorage.setItem(time, "1");
         console.log("Set localstorage");
-        document.getElementById("cl").innerText = JSON.stringify(handle.localStorage);
-
-        try {
-          const parentLocal = handle.parent.localStorage;
-          console.log(handle.parent.location.pathname, "handle.parent.localStorage", parentLocal);
-        } catch (e) { console.log("handle.parent.localStorage - not available"); }
-
-        try {
-          const parentLocal = handle.localStorage;
-          console.log(handle.location.pathname, "handle.localStorage", parentLocal);
-        } catch (e) { console.log("handle.localStorage - not available"); }
-
+        document.getElementById("pl").innerText = JSON.stringify(handle.localStorage);
       }
 
     }
@@ -53,22 +41,10 @@
       const session = JSON.stringify(window.sessionStorage);
       console.log("session", session);
       document.getElementById("cs").innerText = session;
-
-      const parentSession = JSON.stringify(window.parent.sessionStorage);
-      console.log(window.parent.location.pathname, "parentSession", parentSession);
-      document.getElementById("ps").innerText = `${window.parent.location.pathname} ${parentSession}`;
+      
 
       if (handle) {
-        try {
-          const parentSession = handle.parent.sessionStorage;
-          console.log(handle.parent.location.pathname, "handle.parent.sessionStorage", parentSession);
-        } catch (e) { console.log("handle.parent.sessionStorage - not available"); }
-
-        try {
-          const parentSession = handle.sessionStorage;
-          console.log(handle.location.pathname, "handle.sessionStorage", parentSession);
-        } catch (e) { console.log("handle.sessionStorage - not available"); }
-
+        document.getElementById("ps").innerText = JSON.stringify(handle.sessionStorage);
       }
     }
 
@@ -92,6 +68,7 @@
           // If we want to modify unpartitioned state, we need to request a handle.
           const handle = await document.requestStorageAccess({
             localStorage: true,
+            sessionStorage: true,
           });
           doThingsWithLocalStorage(handle);
           doThingsWithSessionStorage(handle);
@@ -109,6 +86,7 @@
               const handle = await document.requestStorageAccess({
                 cookies: true,
                 localStorage: true,
+                sessionStorage: true,
               });
               doThingsWithLocalStorage(handle);
               doThingsWithSessionStorage(handle);
@@ -120,6 +98,7 @@
                   const handle = await document.requestStorageAccess({
                     cookies: true,
                     localStorage: true,
+                    sessionStorage: true,
                   });
                   doThingsWithLocalStorage(handle);
                   doThingsWithSessionStorage(handle);
