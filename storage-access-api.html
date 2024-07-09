@@ -112,7 +112,7 @@
                 doThingsWithSessionStorage(handle);
                 doThingsWithCookies();
               } catch (err) {
-                console.log("error obtaining storage access");
+                console.log("error obtaining storage access", err);
                 // If there is an error obtaining storage access.
               }
             }
