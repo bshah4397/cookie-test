@@ -46,78 +46,96 @@
       }
       
       function doThingsWithLocalStorage(handle) {
-        handle.localStorage.setItem("foo", "bar"); // set a local storage key
+        handle.localStorage.setItem("foo", "bar");
+        console.log("Set localstorage - foo: bar");
 
-        alert(JSON.stringify(handle.parent.sessionStorage));
-        alert(JSON.stringify(handle.sessionStorage));
+        try { console.log("handle.parent.sessionStorage",JSON.stringify(handle.parent.sessionStorage)); }
+        try { console.log("handle.sessionStorage",JSON.stringify(handle.sessionStorage)); }
+        
+      }
+
+      async function isSafari() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.indexOf("safar") !== -1;
       }
       
       async function handleCookieAccess() {
         if (!document.hasStorageAccess) {
-          // This browser doesn't support the Storage Access API
-          // so let's just hope we have access!
+          console.log("This browser doesn't support the Storage Access API, so let's just hope we have access!");
           doThingsWithCookies();
-          alert("This browser doesn't support the Storage Access API");
         } else {
           const hasAccess = await document.hasStorageAccess();
+          console.log("hasAccess",hasAccess);
           if (hasAccess) {
-            // We have access to third-party cookies, so let's go
-            alert("We have access to third-party cookies");
+            console.log("We have access to third-party cookies");
             doThingsWithCookies();
             // If we want to modify unpartitioned state, we need to request a handle.
             const handle = await document.requestStorageAccess({
               localStorage: true,
               sessionStorage: true,
             });
-            console.log("Handle with session storage",handle);
+            console.log("Handle with local + session storage",handle);
             doThingsWithLocalStorage(handle);
           } else {
-            // Check whether third-party cookie access has been granted
-            // to another same-site embed
-            alert("Checking whether third-party cookie access has been granted to another same-site embed");
-            try {
-              const permission = await navigator.permissions.query({
-                name: "storage-access",
-              });
-      
-              if (permission.state === "granted") {
-                alert("Already granted, can directly call requestStorageAccess()");
-                // If so, you can just call requestStorageAccess() without a user interaction,
-                // and it will resolve automatically.
-                const handle = await document.requestStorageAccess({
-                  cookies: true,
-                  localStorage: true,
+            if(isSafari()) {
+              console.log("Browser is Safari");
+              console.log("Calling requestStorageAccess()");
+              const handle = await document.requestStorageAccess({
+                    cookies: true,
+                    localStorage: true,
+                    sessionStorage: true,
+                  });
+              doThingsWithLocalStorage(handle);
+              doThingsWithCookies();
+            } else {
+              console.log("Checking whether third-party cookie access has been granted to another same-site embed");
+              try {
+                const permission = await navigator.permissions.query({
+                  name: "storage-access",
                 });
-                doThingsWithLocalStorage(handle);
-                doThingsWithCookies();
-              } else if (permission.state === "prompt") {
-                alert("User prompt - Need to call requestStorageAccess() after a user interaction");
-                // Need to call requestStorageAccess() after a user interaction
-                btn.addEventListener("click", async () => {
-                  try {
-                    const handle = await document.requestStorageAccess({
-                      cookies: true,
-                      localStorage: true,
-                    });
-                    doThingsWithLocalStorage(handle);
-                    doThingsWithCookies();
-                  } catch (err) {
-                    alert("error obtaining storage access");
-                    // If there is an error obtaining storage access.
-                    console.error(`Error obtaining storage access: ${err}.
-                                  Please sign in.`);
-                  }
-                });
-              } else if (permission.state === "denied") {
-                alert("User has denied third-party cookie access");
-                // User has denied third-party cookie access, so we'll
-                // need to do something else
+        
+                if (permission.state === "granted") {
+                  console.log("Already granted, can directly call requestStorageAccess()");
+                  // If so, you can just call requestStorageAccess() without a user interaction,
+                  // and it will resolve automatically.
+                  const handle = await document.requestStorageAccess({
+                    cookies: true,
+                    localStorage: true,
+                    sessionStorage: true,
+                  });
+                  doThingsWithLocalStorage(handle);
+                  doThingsWithCookies();
+                } else if (permission.state === "prompt") {
+                  console.log("User prompt - Need to call requestStorageAccess() after a user interaction");
+                  // Need to call requestStorageAccess() after a user interaction
+                  btn.addEventListener("click", async () => {
+                    try {
+                      const handle = await document.requestStorageAccess({
+                        cookies: true,
+                        localStorage: true,
+                        sessionStorage: true,
+                      });
+                      doThingsWithLocalStorage(handle);
+                      doThingsWithCookies();
+                    } catch (err) {
+                      console.log("error obtaining storage access");
+                      // If there is an error obtaining storage access.
+                      console.error(`Error obtaining storage access: ${err}.
+                                    Please sign in.`);
+                    }
+                  });
+                } else if (permission.state === "denied") {
+                  console.log("User has denied third-party cookie access");
+                  // User has denied third-party cookie access, so we'll
+                  // need to do something else
+                }
+              } catch (error) {
+                console.log("Could not access permission state");
+                console.log(`Could not access permission state. Error: ${error}`);
+                doThingsWithCookies(); // Again, we'll have to hope we have access!
               }
-            } catch (error) {
-              alert("Could not access permission state");
-              console.log(`Could not access permission state. Error: ${error}`);
-              doThingsWithCookies(); // Again, we'll have to hope we have access!
             }
+            
           }
         }
         showSessionStorage();
