@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookie Setter</title>
+    <script>
+      function setCookie() {
+        const value = document.getElementById("inputBox").value;
+        document.cookie = `myCookie=${value}; path=/`;
+        showCookie();
+      }
+ 
+      function showCookie() {
+        const name = "myCookie=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        document.getElementById("cookieValue").innerText = decodedCookie;
+        // const ca = decodedCookie.split(";");
+        // for (let i = 0; i < ca.length; i++) {
+        //   let c = ca[i];
+        //   while (c.charAt(0) == " ") {
+        //     c = c.substring(1);
+        //   }
+        //   if (c.indexOf(name) == 0) {
+        //     document.getElementById("cookieValue").innerText = c.substring(
+        //       name.length,
+        //       c.length
+        //     );
+        //     return;
+        //   }
+        // }
+        // document.getElementById("cookieValue").innerText = "Cookie not set";
+      }
+
+      function showSessionStorage() {
+        const session = JSON.stringify(sessionStorage);
+        document.getElementById("sessionValue").innerText = session;
+      }
+
+      function doThingsWithCookies() {
+        document.cookie = "foo=bar"; // set a cookie
+        showCookie();
+      }
+      
+      function doThingsWithLocalStorage(handle) {
+        handle.localStorage.setItem("foo", "bar"); // set a local storage key
+      }
+      
+      async function handleCookieAccess() {
+        if (!document.hasStorageAccess) {
+          // This browser doesn't support the Storage Access API
+          // so let's just hope we have access!
+          doThingsWithCookies();
+        } else {
+          const hasAccess = await document.hasStorageAccess();
+          if (hasAccess) {
+            // We have access to third-party cookies, so let's go
+            doThingsWithCookies();
+            // If we want to modify unpartitioned state, we need to request a handle.
+            const handle = await document.requestStorageAccess({
+              localStorage: true,
+            });
+            doThingsWithLocalStorage(handle);
+          } else {
+            // Check whether third-party cookie access has been granted
+            // to another same-site embed
+            try {
+              const permission = await navigator.permissions.query({
+                name: "storage-access",
+              });
+      
+              if (permission.state === "granted") {
+                // If so, you can just call requestStorageAccess() without a user interaction,
+                // and it will resolve automatically.
+                const handle = await document.requestStorageAccess({
+                  cookies: true,
+                  localStorage: true,
+                });
+                doThingsWithLocalStorage(handle);
+                doThingsWithCookies();
+              } else if (permission.state === "prompt") {
+                // Need to call requestStorageAccess() after a user interaction
+                btn.addEventListener("click", async () => {
+                  try {
+                    const handle = await document.requestStorageAccess({
+                      cookies: true,
+                      localStorage: true,
+                    });
+                    doThingsWithLocalStorage(handle);
+                    doThingsWithCookies();
+                  } catch (err) {
+                    // If there is an error obtaining storage access.
+                    console.error(`Error obtaining storage access: ${err}.
+                                  Please sign in.`);
+                  }
+                });
+              } else if (permission.state === "denied") {
+                // User has denied third-party cookie access, so we'll
+                // need to do something else
+              }
+            } catch (error) {
+              console.log(`Could not access permission state. Error: ${error}`);
+              doThingsWithCookies(); // Again, we'll have to hope we have access!
+            }
+          }
+        }
+      }
+ 
+      window.onload = function () {
+        showSessionStorage();
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Sample Cookie App using Storage Access API</h1>
+    <div>
+      <label for="inputBox">Enter value:</label>
+      <input type="text" id="inputBox" />
+      <button onclick="setCookie()">Set Cookie</button>
+      <button onclick="handleCookieAccess()">Request Cookie Access</button>
+    </div>
+    <div id="cookieValue">Cookie not set</div>
+    <div>Session Storage</div>
+    <div id="sessionValue">Session Storage not set</div>
+  </body>
+</html>
