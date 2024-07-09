@@ -33,8 +33,11 @@
       }
 
       function showSessionStorage() {
-        const session = JSON.stringify(sessionStorage);
+        const session = JSON.stringify(window.sessionStorage);
         document.getElementById("sessionValue").innerText = session;
+
+        const parentSession = JSON.stringify(window.parent.sessionStorage);
+        document.getElementById("parentSessionValue").innerText = parentSession;
       }
 
       function doThingsWithCookies() {
@@ -128,7 +131,9 @@
       <button onclick="handleCookieAccess()">Request Cookie Access</button>
     </div>
     <div id="cookieValue">Cookie not set</div>
-    <div>Session Storage</div>
+    <div>iFrame Session Storage</div>
     <div id="sessionValue">Session Storage not set</div>
+    <div>Parent Session Storage</div>
+    <div id="parentSessionValue">Session Storage not set</div>
   </body>
 </html>
