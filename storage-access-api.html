@@ -47,6 +47,9 @@
       
       function doThingsWithLocalStorage(handle) {
         handle.localStorage.setItem("foo", "bar"); // set a local storage key
+
+        alert(JSON.stringify(handle.parent.sessionStorage));
+        alert(JSON.stringify(handle.sessionStorage));
       }
       
       async function handleCookieAccess() {
@@ -64,6 +67,7 @@
             // If we want to modify unpartitioned state, we need to request a handle.
             const handle = await document.requestStorageAccess({
               localStorage: true,
+              sessionStorage: true,
             });
             doThingsWithLocalStorage(handle);
           } else {
