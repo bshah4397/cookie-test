@@ -96,10 +96,14 @@
 
         if(!hasAccess) {
           console.log("We don't have access to third-party cookies, so let's request access");
-          await document.requestStorageAccess();
-          doThingsWithCookies();
-          // doThingsWithLocalStorage();
-          // doThingsWithSessionStorage();
+          document.requestStorageAccess().then((handle) => {
+            doThingsWithCookies();
+            // doThingsWithLocalStorage(handle);
+            // doThingsWithSessionStorage(handle);
+          }).catch((e) => {
+            console.log("error", e);
+          })
+          
         }
 
         return;
