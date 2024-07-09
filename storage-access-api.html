@@ -7,7 +7,6 @@
   <title>Cookie Setter</title>
   <script>
 
-    const btn = document.getElementById("btn");
     function setCookie() {
       const value = document.getElementById("inputBox").value;
       document.cookie = `myCookie=${value}; path=/; SameSite=None; Secure`;
@@ -80,6 +79,7 @@
 
 
     async function handleCookieAccess() {
+      const btn = document.getElementById("btn");
       if (!document.hasStorageAccess) {
         // This browser doesn't support the Storage Access API
         // so let's just hope we have access!
