@@ -11,6 +11,7 @@
       const value = document.getElementById("valueBox").value;
       const key = document.getElementById("keyBox").value;
       document.cookie = `${key}=${value}; path=/; SameSite=None; Secure`;
+      fetchData();
     }
 
     async function setSession() {
@@ -20,6 +21,7 @@
       const value = document.getElementById("valueBox").value;
       const key = document.getElementById("keyBox").value;
       handle.sessionStorage.setItem(key, value);
+      fetchData();
     }
 
     async function setLocal() {
@@ -29,6 +31,7 @@
       const value = document.getElementById("valueBox").value;
       const key = document.getElementById("keyBox").value;
       handle.localStorage.setItem(key, value);
+      fetchData();
     }
 
     async function checkPermission() {
@@ -55,7 +58,7 @@
         all: true,
       });
 
-      document.getElementById("cookieData").innerText = JSON.stringify(document.cookies);
+      document.getElementById("cookieData").innerText = JSON.stringify(document.cookie);
       document.getElementById("sessionData").innerText = JSON.stringify(handle.sessionStorage);
       document.getElementById("localData").innerText = JSON.stringify(handle.localStorage);
       document.getElementById("handleData").innerText = JSON.stringify(handle);
@@ -107,20 +110,22 @@
   </div>
   <br>
 
-  <h3>Cookie</h3>
-  <div class="cookieData"/>
+  <h3>Session Storage</h3>
+  <div id="sessionData"></div>
   <br>
 
-  <h3>Session Storage</h3>
-  <div class="sessionData"/>
+  <h3>Cookie</h3>
+  <div id="cookieData"></div>
   <br>
+
+  
 
   <h3>Local Storage</h3>
-  <div class="localData"/>
+  <div id="localData"></div>
   <br>
 
   <h3>Handle</h3>
-  <div class="handleData"/>
+  <div id="handleData"></div>
   <br>
 </body>
 
