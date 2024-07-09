@@ -113,7 +113,22 @@
               doThingsWithCookies();
             } else if (permission.state === "prompt") {
               // Need to call requestStorageAccess() after a user interaction
-              btn.addEventListener("click", async () => {
+              // btn.addEventListener("click", async () => {
+              //   try {
+              //     const handle = await document.requestStorageAccess({
+              //       cookies: true,
+              //       localStorage: true,
+              //     });
+              //     doThingsWithLocalStorage(handle);
+              //     doThingsWithSessionStorage(handle);
+              //     doThingsWithCookies();
+              //   } catch (err) {
+              //     // If there is an error obtaining storage access.
+              //     console.error(`Error obtaining storage access: ${err}.
+              //               Please sign in.`);
+              //   }
+              // });
+              
                 try {
                   const handle = await document.requestStorageAccess({
                     cookies: true,
@@ -127,7 +142,7 @@
                   console.error(`Error obtaining storage access: ${err}.
                             Please sign in.`);
                 }
-              });
+              
             } else if (permission.state === "denied") {
               // User has denied third-party cookie access, so we'll
               // need to do something else
