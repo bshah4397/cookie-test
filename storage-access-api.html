@@ -51,10 +51,12 @@
           // This browser doesn't support the Storage Access API
           // so let's just hope we have access!
           doThingsWithCookies();
+          alert("This browser doesn't support the Storage Access API");
         } else {
           const hasAccess = await document.hasStorageAccess();
           if (hasAccess) {
             // We have access to third-party cookies, so let's go
+            alert("We have access to third-party cookies");
             doThingsWithCookies();
             // If we want to modify unpartitioned state, we need to request a handle.
             const handle = await document.requestStorageAccess({
@@ -64,12 +66,14 @@
           } else {
             // Check whether third-party cookie access has been granted
             // to another same-site embed
+            alert("Checking whether third-party cookie access has been granted to another same-site embed");
             try {
               const permission = await navigator.permissions.query({
                 name: "storage-access",
               });
       
               if (permission.state === "granted") {
+                alert("Already granted, can directly call requestStorageAccess()");
                 // If so, you can just call requestStorageAccess() without a user interaction,
                 // and it will resolve automatically.
                 const handle = await document.requestStorageAccess({
@@ -79,6 +83,7 @@
                 doThingsWithLocalStorage(handle);
                 doThingsWithCookies();
               } else if (permission.state === "prompt") {
+                alert("User prompt - Need to call requestStorageAccess() after a user interaction");
                 // Need to call requestStorageAccess() after a user interaction
                 btn.addEventListener("click", async () => {
                   try {
@@ -89,16 +94,19 @@
                     doThingsWithLocalStorage(handle);
                     doThingsWithCookies();
                   } catch (err) {
+                    alert("error obtaining storage access");
                     // If there is an error obtaining storage access.
                     console.error(`Error obtaining storage access: ${err}.
                                   Please sign in.`);
                   }
                 });
               } else if (permission.state === "denied") {
+                alert("User has denied third-party cookie access");
                 // User has denied third-party cookie access, so we'll
                 // need to do something else
               }
             } catch (error) {
+              alert("Could not access permission state");
               console.log(`Could not access permission state. Error: ${error}`);
               doThingsWithCookies(); // Again, we'll have to hope we have access!
             }
