@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cookie Setter</title>
   <script>
+
+    const btn = document.getElementById("btn");
     function setCookie() {
       const value = document.getElementById("inputBox").value;
       document.cookie = `myCookie=${value}; path=/; SameSite=None; Secure`;
@@ -149,7 +151,7 @@
     <label for="inputBox">Enter value:</label>
     <input type="text" id="inputBox" />
     <button onclick="setCookie()">Set Cookie</button>
-    <button onclick="handleCookieAccess()">Request Cookie Access</button>
+    <button onclick="handleCookieAccess()" id="btn">Request Cookie Access</button>
   </div>
   <br>
   <table border="2" width="100%">
