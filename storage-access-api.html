@@ -8,93 +8,66 @@
   <script>
 
     function setCookie() {
-      const value = document.getElementById("inputBox").value;
-      document.cookie = `myCookie=${value}; path=/; SameSite=None; Secure`;
-      showCookie();
+      const value = document.getElementById("valueBox").value;
+      const key = document.getElementById("keyBox").value;
+      document.cookie = `${key}=${value}; path=/; SameSite=None; Secure`;
     }
 
-    function showCookie() {
-      const name = "myCookie=";
-      const decodedCookie = decodeURIComponent(document.cookie);
-      document.getElementById("cc").innerText = decodedCookie;
+    async function setSession() {
+      const handle = await document.requestStorageAccess({
+        all: true,
+      });
+      const value = document.getElementById("valueBox").value;
+      const key = document.getElementById("keyBox").value;
+      handle.sessionStorage.setItem(key, value);
     }
 
-    function doThingsWithCookies() {
-      document.cookie = "foo=bar; SameSite=None; Secure"; // set a cookie
-      showCookie();
+    async function setLocal() {
+      const handle = await document.requestStorageAccess({
+        all: true,
+      });
+      const value = document.getElementById("valueBox").value;
+      const key = document.getElementById("keyBox").value;
+      handle.localStorage.setItem(key, value);
     }
 
-    function doThingsWithLocalStorage(handle) {
-      
-      document.getElementById("cl").innerText = JSON.stringify(window.localStorage);
+    async function checkPermission() {
+      try {
+        const permission = await navigator.permissions.query({
+          name: "storage-access",
+        });
 
-      if (handle) {
-        const time = new Date().toTimeString();
-        handle.localStorage.setItem(time, "1");
-        console.log("Set localstorage");
-        document.getElementById("pl").innerText = JSON.stringify(handle.localStorage);
-      }
-
-    }
-
-    function doThingsWithSessionStorage(handle) {
-      const session = JSON.stringify(window.sessionStorage);
-      console.log("session", session);
-      document.getElementById("cs").innerText = session;
-      
-
-      if (handle) {
-        document.getElementById("ps").innerText = JSON.stringify(handle.sessionStorage);
+        return permission.state;
+      } catch (error) {
+        console.log(`Could not access permission state. Error: ${error}`);
+        return "denied";
       }
     }
 
-    async function isSafari() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      return userAgent.indexOf("safar") !== -1;
+    async function fetchData() {
+      const permission = await checkPermission();
+      if(permission === "denied") {
+        alert("Permission denied");
+        return;
+      }
+
+      const handle = await document.requestStorageAccess({
+        all: true,
+      });
+
+      document.getElementById("cookieData").innerText = JSON.stringify(document.cookies);
+      document.getElementById("sessionData").innerText = JSON.stringify(handle.sessionStorage);
+      document.getElementById("localData").innerText = JSON.stringify(handle.localStorage);
+      document.getElementById("handleData").innerText = JSON.stringify(handle);
     }
 
+    window.onload = async function () {
+      const permission = await checkPermission();
+      document.getElementById("access").innerText = `Access State: ${permission}`;
 
-    async function handleCookieAccess() {
-      const btn = document.getElementById("btn");
-      if (!document.hasStorageAccess) {
-        // This browser doesn't support the Storage Access API
-        // so let's just hope we have access!
-        doThingsWithCookies();
-      } else {
-        const hasAccess = await document.hasStorageAccess();
-        if (hasAccess) {
-          // We have access to third-party cookies, so let's go
-          doThingsWithCookies();
-          // If we want to modify unpartitioned state, we need to request a handle.
-          const handle = await document.requestStorageAccess({
-            localStorage: true,
-            sessionStorage: true,
-          });
-          doThingsWithLocalStorage(handle);
-          doThingsWithSessionStorage(handle);
-        } else {
-          // Check whether third-party cookie access has been granted
-          // to another same-site embed
+      if(permission === "prompt") {
+        document.getElementById("btn").addEventListener("click", async () => {
           try {
-            const permission = await navigator.permissions.query({
-              name: "storage-access",
-            });
-
-            if (permission.state === "granted") {
-              // If so, you can just call requestStorageAccess() without a user interaction,
-              // and it will resolve automatically.
-              const handle = await document.requestStorageAccess({
-                cookies: true,
-                localStorage: true,
-                sessionStorage: true,
-              });
-              doThingsWithLocalStorage(handle);
-              doThingsWithSessionStorage(handle);
-              doThingsWithCookies();
-            } else if (permission.state === "prompt") {
-              // Need to call requestStorageAccess() after a user interaction
-              btn.addEventListener("click", async () => {
-                try {
                   const handle = await document.requestStorageAccess({
                     cookies: true,
                     localStorage: true,
@@ -108,51 +81,47 @@
                   console.error(`Error obtaining storage access: ${err}.
                             Please sign in.`);
                 }
-              });
-            } else if (permission.state === "denied") {
-              // User has denied third-party cookie access, so we'll
-              // need to do something else
-            }
-          } catch (error) {
-            console.log(`Could not access permission state. Error: ${error}`);
-            doThingsWithCookies(); // Again, we'll have to hope we have access!
-          }
-        }
+        })
       }
     }
-
   </script>
 </head>
 
 <body>
   <h1>Sample Cookie App using Storage Access API</h1>
+  <h2 id="access">Access</h2>
   <div>
-    <label for="inputBox">Enter value:</label>
-    <input type="text" id="inputBox" />
-    <button onclick="setCookie()">Set Cookie</button>
-    <button onclick="handleCookieAccess()" id="btn">Request Cookie Access</button>
+    <button onclick="handleCookieAccess()" id="btn">Request Access</button>
   </div>
   <br>
-  <table border="2" width="100%">
-    <tr>
-      <th></th>
-      <th>Cookie</th>
-      <th>Session Storage</th>
-      <th>Local Storage</th>
-    </tr>
-    <tr>
-      <td>Current</td>
-      <td id="cc">N/A</td>
-      <td id="cs">N/A</td>
-      <td id="cl">N/A</td>
-    </tr>
-    <tr>
-      <td>Parent</td>
-      <td id="pc">N/A</td>
-      <td id="ps">N/A</td>
-      <td id="pl">N/A</td>
-    </tr>
-  </table>
+  <div>
+    <button onclick="fetchData()" id="btn">Fetch All Data</button>
+  </div>
+  <br>
+  <div>
+    <input type="text" id="keyBox" placeholder="key"/>
+    <input type="text" id="valueBox" placeholder="value"/>
+    <button onclick="setCookie()">Set Cookie</button>
+    <button onclick="setSession()">Set Session Storage</button>
+    <button onclick="setLocal()">Set Local Storage</button>
+  </div>
+  <br>
+
+  <h3>Cookie</h3>
+  <div class="cookieData"/>
+  <br>
+
+  <h3>Session Storage</h3>
+  <div class="sessionData"/>
+  <br>
+
+  <h3>Local Storage</h3>
+  <div class="localData"/>
+  <br>
+
+  <h3>Handle</h3>
+  <div class="handleData"/>
+  <br>
 </body>
 
 </html>
