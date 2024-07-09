@@ -14,30 +14,7 @@
       function showCookie() {
         const name = "myCookie=";
         const decodedCookie = decodeURIComponent(document.cookie);
-        document.getElementById("cookieValue").innerText = decodedCookie;
-        // const ca = decodedCookie.split(";");
-        // for (let i = 0; i < ca.length; i++) {
-        //   let c = ca[i];
-        //   while (c.charAt(0) == " ") {
-        //     c = c.substring(1);
-        //   }
-        //   if (c.indexOf(name) == 0) {
-        //     document.getElementById("cookieValue").innerText = c.substring(
-        //       name.length,
-        //       c.length
-        //     );
-        //     return;
-        //   }
-        // }
-        // document.getElementById("cookieValue").innerText = "Cookie not set";
-      }
-
-      function showSessionStorage() {
-        const session = JSON.stringify(window.sessionStorage);
-        document.getElementById("sessionValue").innerText = session;
-
-        const parentSession = JSON.stringify(window.parent.sessionStorage);
-        document.getElementById("parentSessionValue").innerText = parentSession;
+        document.getElementById("cc").innerText = decodedCookie;
       }
 
       function doThingsWithCookies() {
@@ -46,12 +23,51 @@
       }
       
       function doThingsWithLocalStorage(handle) {
-        handle.localStorage.setItem("foo", "bar");
-        console.log("Set localstorage - foo: bar");
+        const time = new Date().toTimeString();
+        handle.localStorage.setItem(time, "1");
+        console.log("Set localstorage");
+        document.getElementById("cl").innerText = JSON.stringify(handle.localStorage);
 
-        try { console.log("handle.parent.sessionStorage",JSON.stringify(handle.parent.sessionStorage)); }
-        try { console.log("handle.sessionStorage",JSON.stringify(handle.sessionStorage)); }
+        const parentLocal = JSON.stringify(window.parent.localStorage);
+        console.log(window.parent.location.pathname,"window.parent.localStorage",parentLocal);
+        document.getElementById("pl").innerText = `${window.parent.location.pathname} ${parentLocal}`;
         
+        if(handle) {
+          try {
+            const parentLocal = handle.parent.localStorage;
+            console.log(handle.parent.location.pathname,"handle.parent.localStorage",parentLocal); 
+          } catch(e) { console.log("handle.parent.localStorage - not available"); }
+
+          try {
+            const parentLocal = handle.localStorage;
+            console.log(handle.location.pathname,"handle.localStorage",parentLocal); 
+          } catch(e) { console.log("handle.localStorage - not available"); }
+
+        }
+
+      }
+
+      function doThingsWithSessionStorage(handle) {
+        const session = JSON.stringify(window.sessionStorage);
+        console.log("session",session);
+        document.getElementById("cs").innerText = session;
+
+        const parentSession = JSON.stringify(window.parent.sessionStorage);
+        console.log(window.parent.location.pathname,"parentSession",parentSession);
+        document.getElementById("ps").innerText = `${window.parent.location.pathname} ${parentSession}`;
+        
+        if(handle) {
+          try {
+            const parentSession = handle.parent.sessionStorage;
+            console.log(handle.parent.location.pathname,"handle.parent.sessionStorage",parentSession); 
+          } catch(e) { console.log("handle.parent.sessionStorage - not available"); }
+
+          try {
+            const parentSession = handle.sessionStorage;
+            console.log(handle.location.pathname,"handle.sessionStorage",parentSession); 
+          } catch(e) { console.log("handle.sessionStorage - not available"); }
+
+        }
       }
 
       async function isSafari() {
@@ -76,6 +92,7 @@
             });
             console.log("Handle with local + session storage",handle);
             doThingsWithLocalStorage(handle);
+            doThingsWithSessionStorage(handle);
           } else {
             if(isSafari()) {
               console.log("Browser is Safari");
@@ -86,6 +103,7 @@
                     sessionStorage: true,
                   });
               doThingsWithLocalStorage(handle);
+              doThingsWithSessionStorage(handle);
               doThingsWithCookies();
             } else {
               console.log("Checking whether third-party cookie access has been granted to another same-site embed");
@@ -138,12 +156,7 @@
             
           }
         }
-        showSessionStorage();
       }
- 
-      window.onload = function () {
-        showSessionStorage();
-      };
     </script>
   </head>
   <body>
@@ -154,10 +167,26 @@
       <button onclick="setCookie()">Set Cookie</button>
       <button onclick="handleCookieAccess()">Request Cookie Access</button>
     </div>
-    <div id="cookieValue">Cookie not set</div>
-    <div>iFrame Session Storage</div>
-    <div id="sessionValue">Session Storage not set</div>
-    <div>Parent Session Storage</div>
-    <div id="parentSessionValue">Session Storage not set</div>
+    <br>
+    <table border="2" width="100%">
+      <tr>
+        <th></th>
+        <th>Cookie</th>
+        <th>Session Storage</th>
+        <th>Local Storage</th>
+      </tr>
+      <tr>
+        <td>Current</td>
+        <td id="cc">N/A</td>
+        <td id="cs">N/A</td>
+        <td id="cl">N/A</td>
+      </tr>
+      <tr>
+        <td>Parent</td>
+        <td id="pc">N/A</td>
+        <td id="ps">N/A</td>
+        <td id="pl">N/A</td>
+      </tr>
+    </table>
   </body>
 </html>
